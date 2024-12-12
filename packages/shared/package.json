@@ -2,6 +2,7 @@
   "name": "shared",
   "version": "1.0.0",
   "main": "index.js",
+  "type": "module",
   "scripts": {},
   "keywords": [],
   "author": "",
@@ -9,5 +10,8 @@
   "description": "",
   "devDependencies": {
     "@types/node": "^22.10.2"
+  },
+  "dependencies": {
+    "chrome-remote-interface": "^0.33.2"
   }
 }
