@@ -4,7 +4,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "node index.js",
+    "good": "node index.js",
     "postinstall": "playwright install chromium"
   },
   "keywords": [],

@@ -4,7 +4,8 @@
   "main": "index.js",
   "scripts": {
     "postinstall": "lerna bootstrap --ci && node scripts/postinstall.js",
-    "test": "lerna run test"
+    "good": "lerna run good",
+    "bad": "lerna run bad"
   },
   "keywords": [],
   "author": "",
