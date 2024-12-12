@@ -34,6 +34,15 @@ const setupCDP = async (remoteDebuggingPort) => {
   return client;
 };
 
+const getData = async (client, objectId) => {
+  await client.Runtime.getProperties({
+    objectId: objectId,
+    ownProperties: true,
+    generatePreview: false,
+  });
+  return 1;
+};
+
 const processBatch = async (
   client,
   startIndex,
@@ -44,24 +53,17 @@ const processBatch = async (
   const promises = [];
   const endIndex = Math.min(startIndex + batchSize, commandCount);
   for (let i = startIndex; i < endIndex; i++) {
-    promises.push(
-      client.Runtime.getProperties({
-        objectId: objectId,
-        ownProperties: true,
-        generatePreview: false,
-      })
-    );
+    promises.push(getData(client, objectId));
   }
   const result = await Promise.all(promises);
   return 123;
 };
 
-const runDevtoolsCommands = async (client, commandCount) => {
+const runDevtoolsCommands = async (client, commandCount, batchSize) => {
   const ref = await client.Runtime.evaluate({
     expression: "window",
     returnByValue: false,
   });
-  const batchSize = 100;
   const objectId = ref.result.objectId;
   for (let i = 0; i < commandCount; i += batchSize) {
     console.log("processing batch", i);
@@ -73,6 +75,8 @@ export const main = async (playwrightPath) => {
   const remoteDebuggingPort = "9222";
   const headless = process.argv.includes("--headless");
   const commandCount = 100_000;
+  const batchSize = 5000;
+
   const { page, browser } = await launchBrowser(
     headless,
     remoteDebuggingPort,
@@ -81,6 +85,6 @@ export const main = async (playwrightPath) => {
   await page.goto("https://vscode.dev");
   await page.waitForLoadState("networkidle");
   const client = await setupCDP(remoteDebuggingPort);
-  await runDevtoolsCommands(client, commandCount);
+  await runDevtoolsCommands(client, commandCount, batchSize);
   await browser.close();
 };
