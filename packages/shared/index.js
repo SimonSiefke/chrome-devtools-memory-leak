@@ -16,10 +16,10 @@ const launchBrowser = async (headless, remoteDebuggingPort, playwrightPath) => {
   };
 };
 
-const runDevtoolsCommands = async (commandCount, debuggingPort) => {
+const setupCDP = async (remoteDebuggingPort) => {
   const client = await CDP({
     host: "localhost",
-    port: Number(debuggingPort),
+    port: Number(remoteDebuggingPort),
   });
   const { promise, resolve } = Promise.withResolvers();
   client.Target.attachedToTarget(resolve);
@@ -31,9 +31,42 @@ const runDevtoolsCommands = async (commandCount, debuggingPort) => {
   // @ts-ignore
   const { sessionId } = await promise;
   await client.Runtime.enable(sessionId);
-  const mem = await client.Runtime.getHeapUsage(sessionId);
+  return client;
+};
 
-  console.log({ mem });
+const processBatch = async (
+  client,
+  startIndex,
+  objectId,
+  batchSize,
+  commandCount
+) => {
+  const promises = [];
+  const endIndex = Math.min(startIndex + batchSize, commandCount);
+  for (let i = startIndex; i < endIndex; i++) {
+    promises.push(
+      client.Runtime.getProperties({
+        objectId: objectId,
+        ownProperties: true,
+        generatePreview: false,
+      })
+    );
+  }
+  const result = await Promise.all(promises);
+  return 123;
+};
+
+const runDevtoolsCommands = async (client, commandCount) => {
+  const ref = await client.Runtime.evaluate({
+    expression: "window",
+    returnByValue: false,
+  });
+  const batchSize = 100;
+  const objectId = ref.result.objectId;
+  for (let i = 0; i < commandCount; i += batchSize) {
+    console.log("processing batch", i);
+    await processBatch(client, i, objectId, batchSize, commandCount);
+  }
 };
 
 export const main = async (playwrightPath) => {
@@ -45,8 +78,9 @@ export const main = async (playwrightPath) => {
     remoteDebuggingPort,
     playwrightPath
   );
-  await page.goto("https://example.com");
+  await page.goto("https://vscode.dev");
   await page.waitForLoadState("networkidle");
-  await runDevtoolsCommands(commandCount, remoteDebuggingPort);
+  const client = await setupCDP(remoteDebuggingPort);
+  await runDevtoolsCommands(client, commandCount);
   await browser.close();
 };
