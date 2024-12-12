@@ -1,0 +1,17 @@
+{
+  "name": "chrome-devtools-memory-leak",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "postinstall": "lerna bootstrap --ci && node scripts/postinstall.js",
+    "test": "lerna run test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "lerna": "^8.1.9",
+    "@lerna/legacy-package-management": "^8.1.9"
+  }
+}
