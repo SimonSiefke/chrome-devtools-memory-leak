@@ -14,7 +14,5 @@
   "devDependencies": {
     "playwright": "^1.49.1"
   },
-  "dependencies": {
-    "chrome-remote-interface": "^0.33.2"
-  }
+  "dependencies": {}
 }
